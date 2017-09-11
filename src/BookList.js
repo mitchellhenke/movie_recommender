@@ -19,7 +19,7 @@ class BookList extends Component {
   onRatingClick = (book_id, rating) => {
     const ratings = this.state.ratings;
     const books = this.state.books;
-    const book_index = books.findIndex((obj => obj.id == book_id))
+    const book_index = books.findIndex((obj => obj.id === book_id))
     ratings[book_id] = rating;
     books[book_index].rating = rating;
     this.setState({
