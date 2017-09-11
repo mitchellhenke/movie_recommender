@@ -10,7 +10,7 @@ class BookList extends Component {
 
   render() {
     return (
-      <div>
+      <div className="container">
         {Object.values(this.state.books).map((book) => this.renderBook(book, this.ratingClick))}
       </div>
     );
