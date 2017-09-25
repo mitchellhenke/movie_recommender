@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 
 class Book extends Component {
   render() {
+      console.log(this.props.book)
     return (
       <div>
+        <img alt="Book Cover" src={this.props.book.image_url} />
         <h2>{this.props.book.title}</h2>
+        <div>{this.props.book.predicted_rating}</div>
         <div className="btn-group" role="group" aria-label="...">
           {this.ratingButton(1, this.props.book.rating === 1, this.props.onRatingClick)}
           {this.ratingButton(2, this.props.book.rating === 2, this.props.onRatingClick)}
@@ -17,6 +20,7 @@ class Book extends Component {
   }
 
   handleRatingClick = (event, book_id, value, callback) => {
+    event.preventDefault()
     callback(book_id, value)
   }
 
