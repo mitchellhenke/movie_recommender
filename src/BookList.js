@@ -5,11 +5,10 @@ class BookList extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {all_books: this.props.all_books, books: this.props.books, ratings: []}
+    this.ratingCallback = this.props.onRatingClick.bind(this)
   }
 
   componentDidUpdate = () => {
-    window.scrollTo(0,0);
   }
 
   compareBooks(a, b) {
@@ -35,79 +34,18 @@ class BookList extends Component {
   }
 
   render() {
-    const sorted_books = this.state.books.sort((a,b) =>
-      this.compareBooks(a,b)
-    )
-
     return (
-      <div className="container">
-        <div className="row">
-          <div className="col-md-12">
-            {sorted_books.map((book) => this.renderBook(book, this.ratingClick))}
-          </div>
+      <div className="row">
+        <div className="col-md-12">
+          {this.props.books.map((book) => this.renderBook(book))}
         </div>
       </div>
     );
   }
 
-  onRatingClick = (book_id, rating) => {
-    const ratings = this.state.ratings;
-    const books = this.state.books;
-    const book_index = books.findIndex((obj => obj.id === book_id))
-    const new_ratings = ratings.concat([{id: book_id, rating: rating}])
-    books[book_index].rating = rating;
-
-
-    fetch('http://localhost:5000/predict', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(new_ratings)
-    }).then((response) => response.json())
-      .then((responseJson) => {
-        this.handleNewPredictions(responseJson.predictions)
-
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
-
-    this.setState({
-      ratings: new_ratings,
-      books: books
-    })
-  }
-
-  handleNewPredictions = (predictions) => {
-    let books = this.state.books
-    const new_books = predictions.map((pred) =>
-      Object.assign(this.state.all_books[this.state.all_books.findIndex((obj) => obj.id === pred.id)], {predicted_rating: pred.predicted_rating})
-    )
-
-    console.log(new_books.map((book => book.title)))
-
-    new_books.forEach(function(new_book)  {
-      let index = books.findIndex((obj) => obj.id === new_book.id)
-
-      if(index >= 0) {
-        books[index] = new_book
-      } else {
-        books = books.concat([new_book])
-      }
-    })
-
-
-    this.setState({
-      books: books
-    })
-  }
-
-  renderBook(book, ratingClick) {
+  renderBook(book) {
     return(
-      <Book key={book.id} book={book} onRatingClick={this.onRatingClick}/>
+      <Book key={book.id} book={book} onRatingClick={this.ratingCallback}/>
     );
   }
 }

@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 
 class Book extends Component {
+  constructor(props) {
+    super(props);
+
+    this.ratingCallback = this.props.onRatingClick.bind(this)
+  }
+
   render() {
-      console.log(this.props.book)
     return (
       <div>
         <img alt="Book Cover" src={this.props.book.image_url} />
@@ -21,7 +26,7 @@ class Book extends Component {
 
   handleRatingClick = (event, book_id, value, callback) => {
     event.preventDefault()
-    callback(book_id, value)
+    this.ratingCallback(book_id, value)
   }
 
   ratingButton(value, active, ratingClick) {
