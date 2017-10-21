@@ -6,10 +6,16 @@ import * as Constants from './constants'
 class App extends Component {
   constructor(props) {
     super(props);
-    const all_books = Object.values(Constants.BOOKS)
+    let all_books = Constants.MOVIES
 
     this.refreshRecommendations = this.refreshRecommendations.bind(this)
-    this.state = {searchText: '', books: all_books, ratings: [], shown_books: all_books.slice(0, 20)};
+    let ratings = localStorage.getItem('ratings') || "[]"
+    ratings = JSON.parse(ratings)
+    ratings.forEach(function(rating) {
+      all_books[rating.id].rating = rating.rating
+    })
+
+    this.state = {searchText: '', books: all_books, ratings: ratings, shown_books: all_books.slice(0, 20)};
   }
 
   handleTextChange = (event) => {
@@ -20,16 +26,22 @@ class App extends Component {
     this.setState({searchText: event.target.value, shown_books: shownBooks});
   }
 
-  onRatingClick = (book_id, rating) => {
+  setRatings = (ratings) => {
+    this.setState({
+      ratings: ratings,
+    })
+
+    localStorage.setItem('ratings', JSON.stringify(ratings));
+  }
+
+  onRatingClick = (movie_id, rating) => {
     const ratings = this.state.ratings;
     const books = this.state.books;
-    const book_index = books.findIndex((obj => obj.id === book_id))
-    const new_ratings = ratings.concat([{id: book_id, rating: rating}])
+    const book_index = books.findIndex((obj => obj.id === movie_id))
+    const new_ratings = ratings.concat([{id: movie_id, rating: rating}])
     books[book_index].rating = rating;
 
-    this.setState({
-      ratings: new_ratings,
-    })
+    this.setRatings(new_ratings)
 
     fetch('http://localhost:5000/predict', {
       method: 'POST',
@@ -54,7 +66,7 @@ class App extends Component {
 
   handleNewPredictions = (predictions, books) => {
     books.forEach((book) => {
-      books.predicted_rating = undefined
+      book.predicted_rating = null
     })
     const new_books = predictions.map((pred) =>
       Object.assign(books[books.findIndex((obj) => obj.id === pred.id)], {predicted_rating: pred.predicted_rating})
@@ -75,12 +87,11 @@ class App extends Component {
 
   refreshRecommendations = () => {
     const shown_books = this.state.books.filter((a) => {
-      return a.rating === undefined &&
-        !a.title.includes("(")
+      return !a.rating
     }).sort((a, b) =>{
-      if(a.predicted_rating === undefined) {
+      if(!a.predicted_rating) {
         return 1;
-      } else if(b.predicted_rating === undefined) {
+      } else if(!b.predicted_rating) {
         return -1;
       } else {
         return b.predicted_rating - a.predicted_rating

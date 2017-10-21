@@ -10,7 +10,6 @@ class Book extends Component {
   render() {
     return (
       <div>
-        <img alt="Book Cover" src={this.props.book.image_url} />
         <h2>{this.props.book.title}</h2>
         <div>{this.props.book.predicted_rating}</div>
         <div className="btn-group" role="group" aria-label="...">
@@ -24,9 +23,9 @@ class Book extends Component {
     );
   }
 
-  handleRatingClick = (event, book_id, value, callback) => {
+  handleRatingClick = (event, movie_id, value, callback) => {
     event.preventDefault()
-    this.ratingCallback(book_id, value)
+    this.ratingCallback(movie_id, value)
   }
 
   ratingButton(value, active, ratingClick) {
