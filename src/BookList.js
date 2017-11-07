@@ -35,10 +35,8 @@ class BookList extends Component {
 
   render() {
     return (
-      <div className="row">
-        <div className="col-md-12">
-          {this.props.books.map((book) => this.renderBook(book))}
-        </div>
+      <div>
+        {this.props.books.map((book) => this.renderBook(book))}
       </div>
     );
   }

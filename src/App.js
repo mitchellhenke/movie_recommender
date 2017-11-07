@@ -8,14 +8,14 @@ class App extends Component {
     super(props);
     let all_books = Constants.MOVIES
 
-    this.refreshRecommendations = this.refreshRecommendations.bind(this)
     let ratings = localStorage.getItem('ratings') || "[]"
     ratings = JSON.parse(ratings)
     ratings.forEach(function(rating) {
       all_books[rating.id].rating = rating.rating
     })
+    this.getNewRecommendations(all_books, ratings);
 
-    this.state = {searchText: '', books: all_books, ratings: ratings, shown_books: all_books.slice(0, 20)};
+    this.state = {searchText: '', books: all_books, ratings: ratings, shown_books: all_books.slice(0, 20), seq_books: []};
   }
 
   handleTextChange = (event) => {
@@ -26,42 +26,59 @@ class App extends Component {
     this.setState({searchText: event.target.value, shown_books: shownBooks});
   }
 
-  setRatings = (ratings) => {
+  addRating = (rating) => {
+    const ratings = this.state.ratings.filter((r) => {
+      return r.id !== rating.id
+    }).concat([rating])
+
     this.setState({
-      ratings: ratings,
-    })
+      ratings: ratings
+    });
 
     localStorage.setItem('ratings', JSON.stringify(ratings));
+    return ratings;
   }
 
-  onRatingClick = (movie_id, rating) => {
-    const ratings = this.state.ratings;
-    const books = this.state.books;
-    const book_index = books.findIndex((obj => obj.id === movie_id))
-    const new_ratings = ratings.concat([{id: movie_id, rating: rating}])
-    books[book_index].rating = rating;
-
-    this.setRatings(new_ratings)
-
+  getNewRecommendations = (books, ratings) => {
+    if(ratings.length === 0) {
+      return null;
+    }
     fetch('http://localhost:5000/predict', {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(new_ratings)
+      body: JSON.stringify(ratings)
     }).then((response) => response.json())
       .then((responseJson) => {
         const new_books = this.handleNewPredictions(responseJson.predictions, books)
+        const new_seq_recs = this.handleNewSeqRecs(responseJson.next_recs, books)
+        const new_shown_books = this.refreshRecommendations(new_books)
 
         this.setState({
-          books: new_books
+          shown_books: new_shown_books,
+          books: new_books,
+          seq_books: new_seq_recs
         })
 
       })
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  onRatingClick = (movie_id, rating) => {
+    const books = this.state.books;
+    const book_index = books.findIndex((obj => obj.id === movie_id))
+    books[book_index].rating = rating;
+
+    const new_ratings = this.addRating({id: movie_id, rating: rating})
+    this.getNewRecommendations(books, new_ratings);
+  }
+
+  handleNewSeqRecs = (book_ids, books) => {
+    return book_ids.map((book_id) => books[book_id])
   }
 
   handleNewPredictions = (predictions, books) => {
@@ -85,8 +102,8 @@ class App extends Component {
     return books
   }
 
-  refreshRecommendations = () => {
-    const shown_books = this.state.books.filter((a) => {
+  refreshRecommendations = (books) => {
+    return books.filter((a) => {
       return !a.rating
     }).sort((a, b) =>{
       if(!a.predicted_rating) {
@@ -97,21 +114,71 @@ class App extends Component {
         return b.predicted_rating - a.predicted_rating
       }
     }).slice(0, 10)
-
-    this.setState({shown_books: shown_books})
   }
 
+  clearRecommendations = ()  => {
+    const new_books = this.state.books.map((book) => {
+      book.predicted_rating = null;
+      book.rating = null;
+      return book;
+    });
+
+    localStorage.setItem('ratings', JSON.stringify([]));
+
+    this.setState({
+      books: new_books,
+      ratings: [],
+      seq_books: []
+    });
+    return null;
+  }
+
+  renderSeq(book) {
+    return (
+      <div key={book.id}>
+        {book.title}
+      </div>
+    )
+  }
+
+  renderRating(rating) {
+    const book = this.state.books[rating.id]
+    return(
+      <div key={rating.id}>
+        {book.title} - {rating.rating}
+      </div>
+    )
+  }
 
   render() {
     return (
       <div className="container">
+        <h2>Movie Recommender 5K</h2>
         <div className="form-group">
           <input type="text" className="form-control" placeholder="Search" value={this.state.searchText} onChange={this.handleTextChange} />
-          <button className="btn btn-default" onClick={this.refreshRecommendations}>
-            Refresh Recommendations
-          </button>
         </div>
-        <BookList books={this.state.shown_books} onRatingClick={this.onRatingClick}/>
+        <div className="row">
+          <div className="col-md-6">
+            <h3>Top Movies For You</h3>
+            <BookList books={this.state.shown_books} onRatingClick={this.onRatingClick}/>
+          </div>
+          <div className="col-md-6">
+            <h3>What to Watch Next</h3>
+            <BookList books={this.state.seq_books} onRatingClick={this.onRatingClick}/>
+          </div>
+        </div>
+        <hr/>
+        <div className="row">
+          <div className="col-md-12">
+            <button className="btn btn-default" onClick={this.clearRecommendations}>
+              Clear Recommendations
+            </button>
+            <h3>Your Ratings</h3>
+            <div>
+              {this.state.ratings.map((r) => this.renderRating(r))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
