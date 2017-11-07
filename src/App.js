@@ -43,7 +43,7 @@ class App extends Component {
     if(ratings.length === 0) {
       return null;
     }
-    fetch('http://localhost:5000/predict', {
+    fetch('http://a66f685b.ngrok.io/predict', {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
