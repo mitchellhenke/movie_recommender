@@ -159,11 +159,11 @@ class App extends Component {
         </div>
         <div className="row">
           <div className="col-md-6">
-            <h3>Top Movies For You</h3>
+            <h2>Top Movies For You</h2>
             <BookList books={this.state.shown_books} onRatingClick={this.onRatingClick}/>
           </div>
           <div className="col-md-6">
-            <h3>What to Watch Next</h3>
+            <h2>What to Watch Next</h2>
             <BookList books={this.state.seq_books} onRatingClick={this.onRatingClick}/>
           </div>
         </div>
@@ -173,7 +173,7 @@ class App extends Component {
             <button className="btn btn-default" onClick={this.clearRecommendations}>
               Clear Recommendations
             </button>
-            <h3>Your Ratings</h3>
+            <h2>Your Ratings</h2>
             <div>
               {this.state.ratings.map((r) => this.renderRating(r))}
             </div>

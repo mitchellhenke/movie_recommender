@@ -10,7 +10,7 @@ class Book extends Component {
   render() {
     return (
       <div>
-        <h2>{this.props.book.title}</h2>
+        <h3>{this.props.book.title}</h3>
         <div>{this.props.book.predicted_rating}</div>
         <div className="btn-group" role="group" aria-label="...">
           {this.ratingButton(1, this.props.book.rating === 1, this.props.onRatingClick)}
