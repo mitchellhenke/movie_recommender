@@ -1,3 +1,5 @@
+// TODO: rename everything from books to movies
+
 import React, { Component } from 'react';
 import BookList from './BookList'
 import './App.css';
