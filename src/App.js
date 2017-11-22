@@ -115,7 +115,7 @@ class App extends Component {
 
   refreshRecommendations = (books) => {
     return books.filter((a) => {
-      return !a.rating
+      return !a.rating && a.predicted_rating
     }).sort((a, b) =>{
       if(!a.predicted_rating) {
         return 1;
