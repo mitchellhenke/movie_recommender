@@ -70,6 +70,7 @@ class App extends Component {
         const new_shown_books = this.refreshRecommendations(new_books)
 
         this.setState({
+          resultsTitle: "Top Movies For You",
           shown_books: new_shown_books,
           books: new_books,
           seq_books: new_seq_recs
