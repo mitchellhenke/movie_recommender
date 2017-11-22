@@ -56,7 +56,7 @@ class App extends Component {
       return null;
     }
     NProgress.start();
-    fetch('http://mh-movie-recommender.herokuapp.com/predict', {
+    fetch('https://mh-movie-recommender.herokuapp.com/predict', {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
