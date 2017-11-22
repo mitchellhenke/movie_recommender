@@ -1,6 +1,7 @@
 // TODO: rename everything from books to movies
 
 import React, { Component } from 'react';
+import NProgress from 'nprogress'
 import BookList from './BookList'
 import './App.css';
 import * as Constants from './constants'
@@ -54,6 +55,7 @@ class App extends Component {
     if(ratings.length === 0) {
       return null;
     }
+    NProgress.start();
     fetch('http://mh-movie-recommender.herokuapp.com/predict', {
       method: 'POST',
       headers: {
@@ -73,9 +75,11 @@ class App extends Component {
           seq_books: new_seq_recs
         })
 
+        NProgress.done();
       })
       .catch((error) => {
         console.error(error);
+        NProgress.done();
       });
   }
 
