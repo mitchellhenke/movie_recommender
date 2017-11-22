@@ -17,15 +17,24 @@ class App extends Component {
     })
     this.getNewRecommendations(all_books, ratings);
 
-    this.state = {searchText: '', books: all_books, ratings: ratings, shown_books: all_books.slice(0, 20), seq_books: []};
+    this.state = {searchText: '', books: all_books, ratings: ratings, shown_books: all_books.slice(0, 20), seq_books: [], resultsTitle: "Top Movies For You"};
   }
 
   handleTextChange = (event) => {
-    const shownBooks = this.state.books.filter((a) => {
-      return a.title.toLowerCase().includes(event.target.value.toLowerCase())
-    }).slice(0, 10)
+    if(event.target.value === "") {
+      const recommended_books = this.refreshRecommendations(this.state.books)
+      this.setState({searchText: event.target.value,
+        shown_books: recommended_books,
+        resultsTitle: "Top Movies For You"});
+    } else {
+      const shownBooks = this.state.books.filter((a) => {
+        return a.title.toLowerCase().includes(event.target.value.toLowerCase())
+      }).slice(0, 10)
 
-    this.setState({searchText: event.target.value, shown_books: shownBooks});
+      this.setState({searchText: event.target.value,
+        shown_books: shownBooks,
+        resultsTitle: "Search Results"});
+    }
   }
 
   addRating = (rating) => {
@@ -161,7 +170,7 @@ class App extends Component {
         </div>
         <div className="row">
           <div className="col-md-6">
-            <h2>Top Movies For You</h2>
+            <h2>{this.state.resultsTitle}</h2>
             <BookList books={this.state.shown_books} onRatingClick={this.onRatingClick}/>
           </div>
           <div className="col-md-6">
